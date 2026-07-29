@@ -1,5 +1,6 @@
 # app/infrastructure/adapters/output/postgres_repository.py
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 from typing import Optional
 import logging
 from app.domain.entities import User
@@ -16,9 +17,9 @@ class PostgresUserRepositoryAdapter(UserRepositoryPort):
         try:
             logger.info(f"Buscando usuario por email: {email}")
             
-            # ✅ Hacer un ping a la base de datos para verificar la conexión
+            # ✅ Corregir: usar text() para SQL explícito
             try:
-                self.db.execute("SELECT 1")
+                self.db.execute(text("SELECT 1"))
             except Exception as e:
                 logger.error(f"❌ Error de conexión a la base de datos: {e}")
                 raise
