@@ -15,6 +15,14 @@ class PostgresUserRepositoryAdapter(UserRepositoryPort):
     def find_by_email(self, email: str) -> Optional[User]:
         try:
             logger.info(f"Buscando usuario por email: {email}")
+            
+            # ✅ Hacer un ping a la base de datos para verificar la conexión
+            try:
+                self.db.execute("SELECT 1")
+            except Exception as e:
+                logger.error(f"❌ Error de conexión a la base de datos: {e}")
+                raise
+            
             sql_user = self.db.query(SQLUsuario).filter(SQLUsuario.email == email).first()
             if not sql_user:
                 logger.info(f"Usuario no encontrado: {email}")
@@ -23,16 +31,16 @@ class PostgresUserRepositoryAdapter(UserRepositoryPort):
             logger.info(f"Usuario encontrado: {email}")
             return User(
                 id=sql_user.id, 
-                fullName=sql_user.nombre_completo, 
+                fullName=sql_user.fullname, 
                 email=sql_user.email,
                 phoneNumber=sql_user.telefono, 
                 password_hash=sql_user.password_hash,
-                acceptTerms=sql_user.acepto_terminos, 
+                acceptTerms=sql_user.acceptterms, 
                 rol=sql_user.rol, 
                 fecha_creacion=sql_user.fecha_creacion
             )
         except Exception as e:
-            logger.error(f"Error en find_by_email: {e}")
+            logger.error(f"❌ Error en find_by_email: {e}")
             raise
 
     def save(self, user: User) -> User:
@@ -42,7 +50,7 @@ class PostgresUserRepositoryAdapter(UserRepositoryPort):
             sql_user = self.db.query(SQLUsuario).filter(SQLUsuario.email == user.email).first()
             
             if sql_user:
-                sql_user.nombre_completo = user.fullName
+                sql_user.fullname = user.fullName
                 sql_user.telefono = user.phoneNumber
                 if user.rol is not None:
                     sql_user.rol = user.rol
@@ -51,11 +59,11 @@ class PostgresUserRepositoryAdapter(UserRepositoryPort):
                 logger.info(f"Usuario actualizado: {user.email}")
             else:
                 sql_user = SQLUsuario(
-                    nombre_completo=user.fullName, 
+                    fullname=user.fullName, 
                     email=user.email, 
                     telefono=user.phoneNumber,
                     password_hash=user.password_hash, 
-                    acepto_terminos=user.acceptTerms, 
+                    acceptterms=user.acceptTerms, 
                     rol=user.rol or "Productor"
                 )
                 self.db.add(sql_user)
@@ -69,5 +77,5 @@ class PostgresUserRepositoryAdapter(UserRepositoryPort):
             return user
         except Exception as e:
             self.db.rollback()
-            logger.error(f"Error en save: {e}")
+            logger.error(f"❌ Error en save: {e}")
             raise

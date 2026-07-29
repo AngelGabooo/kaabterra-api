@@ -1,4 +1,4 @@
-# app/main.py - VERSIÓN DEFINITIVA CON TODOS LOS ENDPOINTS
+# app/main.py - VERSIÓN DEFINITIVA SIN imageUrl
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
@@ -41,7 +41,7 @@ app.add_middleware(
 )
 
 # ============================================================
-# MODELOS PARA FARMS
+# MODELOS PARA FARMS (SIN imageUrl)
 # ============================================================
 
 class CreateFarmRequest(BaseModel):
@@ -51,7 +51,7 @@ class CreateFarmRequest(BaseModel):
     lots: int
     productivity: float
     status: str
-    imageUrl: str
+    # ❌ imageUrl ELIMINADO
     latitude: float
     longitude: float
     altitude: int
@@ -69,7 +69,7 @@ class FarmResponse(BaseModel):
     lots: int
     productivity: float
     status: str
-    imageUrl: str
+    # ❌ imageUrl ELIMINADO
     latitude: float
     longitude: float
     altitude: int
@@ -83,7 +83,7 @@ class FarmResponse(BaseModel):
         from_attributes = True
 
 # ============================================================
-# ENDPOINTS DE FARMS - DIRECTOS EN MAIN
+# ENDPOINTS DE FARMS - DIRECTOS EN MAIN (SIN imageUrl)
 # ============================================================
 
 @app.post("/api/farms", response_model=FarmResponse, status_code=status.HTTP_201_CREATED)
@@ -98,13 +98,13 @@ def create_farm(farm_in: CreateFarmRequest, db: Session = Depends(get_db)):
             lots=farm_in.lots,
             productivity=farm_in.productivity,
             status=farm_in.status,
-            imageUrl=farm_in.imageUrl,  # ✅ Nombre ORIGINAL
+            # ❌ imageUrl ELIMINADO
             latitude=farm_in.latitude,
             longitude=farm_in.longitude,
             altitude=farm_in.altitude,
-            establishmentYear=farm_in.establishmentYear,  # ✅ Nombre ORIGINAL
-            mainVariety=farm_in.mainVariety,  # ✅ Nombre ORIGINAL
-            productionSystem=farm_in.productionSystem,  # ✅ Nombre ORIGINAL
+            establishmentYear=farm_in.establishmentYear,
+            mainVariety=farm_in.mainVariety,
+            productionSystem=farm_in.productionSystem,
             certifications=farm_in.certifications,
             producer_email=farm_in.producerEmail,
         )
@@ -121,8 +121,6 @@ def create_farm(farm_in: CreateFarmRequest, db: Session = Depends(get_db)):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error al crear finca: {str(e)}"
         )
-
-    
 
 @app.get("/api/farms/producer/{producer_email}", response_model=List[FarmResponse])
 def get_farms_by_producer(producer_email: str, db: Session = Depends(get_db)):
@@ -148,14 +146,14 @@ def update_farm(farm_id: int, farm_in: CreateFarmRequest, db: Session = Depends(
         if not farm:
             raise HTTPException(status_code=404, detail="Finca no encontrada")
         
-        # ✅ USAR NOMBRES ORIGINALES
+        # ✅ Actualizar campos (SIN imageUrl)
         farm.name = farm_in.name
         farm.location = farm_in.location
         farm.hectares = farm_in.hectares
         farm.lots = farm_in.lots
         farm.productivity = farm_in.productivity
         farm.status = farm_in.status
-        farm.imageUrl = farm_in.imageUrl
+        # ❌ imageUrl ELIMINADO
         farm.latitude = farm_in.latitude
         farm.longitude = farm_in.longitude
         farm.altitude = farm_in.altitude
@@ -180,7 +178,6 @@ def update_farm(farm_id: int, farm_in: CreateFarmRequest, db: Session = Depends(
             detail=f"Error al actualizar finca: {str(e)}"
         )
 
-    
 @app.delete("/api/farms/{farm_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_farm(farm_id: int, db: Session = Depends(get_db)):
     try:
