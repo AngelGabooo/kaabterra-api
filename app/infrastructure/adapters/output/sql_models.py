@@ -1,9 +1,11 @@
 # app/infrastructure/adapters/output/sql_models.py
-import enum
-from sqlalchemy import Column, Integer, String, Enum, DateTime, Boolean, Float, JSON, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, Float, JSON, ForeignKey
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.infrastructure.config.database import Base
+
+# ✅ NO uses Enum para el rol, usa String directamente
+# ❌ NO definas TipoUsuarioEnum
 
 class SQLUsuario(Base):
     __tablename__ = "usuarios"
@@ -13,7 +15,7 @@ class SQLUsuario(Base):
     email = Column(String(150), unique=True, nullable=False, index=True)
     telefono = Column(String(20), name="telefono", nullable=False)
     password_hash = Column(String(255), nullable=False)
-    rol = Column(String(50), nullable=True, default="Productor")
+    rol = Column(String(50), nullable=True, default="Productor")  # ✅ String
     acepto_terminos = Column(Boolean, name="acceptterms", nullable=False, default=False)
     fecha_creacion = Column(DateTime(timezone=True), name="fecha_creacion", server_default=func.now())
 
