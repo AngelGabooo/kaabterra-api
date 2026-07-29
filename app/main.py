@@ -99,13 +99,13 @@ def create_farm(farm_in: CreateFarmRequest, db: Session = Depends(get_db)):
             lots=farm_in.lots,
             productivity=farm_in.productivity,
             status=farm_in.status,
-            image_url=farm_in.imageUrl,  # ✅ Cambiar a minúsculas
+            imageUrl=farm_in.imageUrl,  # ✅ Nombre original
             latitude=farm_in.latitude,
             longitude=farm_in.longitude,
             altitude=farm_in.altitude,
-            establishment_year=farm_in.establishmentYear,  # ✅ Cambiar a minúsculas
-            main_variety=farm_in.mainVariety,  # ✅ Cambiar a minúsculas
-            production_system=farm_in.productionSystem,  # ✅ Cambiar a minúsculas
+            establishmentYear=farm_in.establishmentYear,  # ✅ Nombre original
+            mainVariety=farm_in.mainVariety,  # ✅ Nombre original
+            productionSystem=farm_in.productionSystem,  # ✅ Nombre original
             certifications=farm_in.certifications,
             producer_email=farm_in.producerEmail,
         )
@@ -122,7 +122,7 @@ def create_farm(farm_in: CreateFarmRequest, db: Session = Depends(get_db)):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error al crear finca: {str(e)}"
         )
-
+    
     
 @app.get("/api/farms/producer/{producer_email}", response_model=List[FarmResponse])
 def get_farms_by_producer(producer_email: str, db: Session = Depends(get_db)):
@@ -148,20 +148,20 @@ def update_farm(farm_id: int, farm_in: CreateFarmRequest, db: Session = Depends(
         if not farm:
             raise HTTPException(status_code=404, detail="Finca no encontrada")
         
-        # Actualizar campos
+        # Actualizar campos - USAR NOMBRES ORIGINALES
         farm.name = farm_in.name
         farm.location = farm_in.location
         farm.hectares = farm_in.hectares
         farm.lots = farm_in.lots
         farm.productivity = farm_in.productivity
         farm.status = farm_in.status
-        farm.image_url = farm_in.imageUrl
+        farm.imageUrl = farm_in.imageUrl  # ✅ Nombre original
         farm.latitude = farm_in.latitude
         farm.longitude = farm_in.longitude
         farm.altitude = farm_in.altitude
-        farm.establishment_year = farm_in.establishmentYear
-        farm.main_variety = farm_in.mainVariety
-        farm.production_system = farm_in.productionSystem
+        farm.establishmentYear = farm_in.establishmentYear  # ✅ Nombre original
+        farm.mainVariety = farm_in.mainVariety  # ✅ Nombre original
+        farm.productionSystem = farm_in.productionSystem  # ✅ Nombre original
         farm.certifications = farm_in.certifications
         farm.producer_email = farm_in.producerEmail
         
