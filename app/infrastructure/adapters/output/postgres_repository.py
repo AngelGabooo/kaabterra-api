@@ -38,12 +38,10 @@ class PostgresUserRepositoryAdapter(UserRepositoryPort):
     def save(self, user: User) -> User:
         try:
             logger.info(f"Guardando usuario: {user.email}")
-            logger.info(f"Rol recibido: {user.rol}")
             
             sql_user = self.db.query(SQLUsuario).filter(SQLUsuario.email == user.email).first()
             
             if sql_user:
-                # Actualizar
                 sql_user.nombre_completo = user.fullName
                 sql_user.telefono = user.phoneNumber
                 if user.rol is not None:
@@ -52,7 +50,6 @@ class PostgresUserRepositoryAdapter(UserRepositoryPort):
                     sql_user.password_hash = user.password_hash
                 logger.info(f"Usuario actualizado: {user.email}")
             else:
-                # Crear
                 sql_user = SQLUsuario(
                     nombre_completo=user.fullName, 
                     email=user.email, 

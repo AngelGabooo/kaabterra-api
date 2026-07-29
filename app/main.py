@@ -86,7 +86,6 @@ class FarmResponse(BaseModel):
 # ENDPOINTS DE FARMS - DIRECTOS EN MAIN
 # ============================================================
 
-# app/main.py - Parte de create_farm
 @app.post("/api/farms", response_model=FarmResponse, status_code=status.HTTP_201_CREATED)
 def create_farm(farm_in: CreateFarmRequest, db: Session = Depends(get_db)):
     try:
@@ -99,13 +98,13 @@ def create_farm(farm_in: CreateFarmRequest, db: Session = Depends(get_db)):
             lots=farm_in.lots,
             productivity=farm_in.productivity,
             status=farm_in.status,
-            imageUrl=farm_in.imageUrl,  # ✅ Nombre original
+            imageUrl=farm_in.imageUrl,  # ✅ Nombre ORIGINAL
             latitude=farm_in.latitude,
             longitude=farm_in.longitude,
             altitude=farm_in.altitude,
-            establishmentYear=farm_in.establishmentYear,  # ✅ Nombre original
-            mainVariety=farm_in.mainVariety,  # ✅ Nombre original
-            productionSystem=farm_in.productionSystem,  # ✅ Nombre original
+            establishmentYear=farm_in.establishmentYear,  # ✅ Nombre ORIGINAL
+            mainVariety=farm_in.mainVariety,  # ✅ Nombre ORIGINAL
+            productionSystem=farm_in.productionSystem,  # ✅ Nombre ORIGINAL
             certifications=farm_in.certifications,
             producer_email=farm_in.producerEmail,
         )
@@ -122,8 +121,9 @@ def create_farm(farm_in: CreateFarmRequest, db: Session = Depends(get_db)):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error al crear finca: {str(e)}"
         )
+
     
-    
+
 @app.get("/api/farms/producer/{producer_email}", response_model=List[FarmResponse])
 def get_farms_by_producer(producer_email: str, db: Session = Depends(get_db)):
     try:
@@ -148,20 +148,20 @@ def update_farm(farm_id: int, farm_in: CreateFarmRequest, db: Session = Depends(
         if not farm:
             raise HTTPException(status_code=404, detail="Finca no encontrada")
         
-        # Actualizar campos - USAR NOMBRES ORIGINALES
+        # ✅ USAR NOMBRES ORIGINALES
         farm.name = farm_in.name
         farm.location = farm_in.location
         farm.hectares = farm_in.hectares
         farm.lots = farm_in.lots
         farm.productivity = farm_in.productivity
         farm.status = farm_in.status
-        farm.imageUrl = farm_in.imageUrl  # ✅ Nombre original
+        farm.imageUrl = farm_in.imageUrl
         farm.latitude = farm_in.latitude
         farm.longitude = farm_in.longitude
         farm.altitude = farm_in.altitude
-        farm.establishmentYear = farm_in.establishmentYear  # ✅ Nombre original
-        farm.mainVariety = farm_in.mainVariety  # ✅ Nombre original
-        farm.productionSystem = farm_in.productionSystem  # ✅ Nombre original
+        farm.establishmentYear = farm_in.establishmentYear
+        farm.mainVariety = farm_in.mainVariety
+        farm.productionSystem = farm_in.productionSystem
         farm.certifications = farm_in.certifications
         farm.producer_email = farm_in.producerEmail
         
@@ -180,6 +180,7 @@ def update_farm(farm_id: int, farm_in: CreateFarmRequest, db: Session = Depends(
             detail=f"Error al actualizar finca: {str(e)}"
         )
 
+    
 @app.delete("/api/farms/{farm_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_farm(farm_id: int, db: Session = Depends(get_db)):
     try:
