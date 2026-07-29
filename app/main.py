@@ -86,6 +86,7 @@ class FarmResponse(BaseModel):
 # ENDPOINTS DE FARMS - DIRECTOS EN MAIN
 # ============================================================
 
+# app/main.py - Parte de create_farm
 @app.post("/api/farms", response_model=FarmResponse, status_code=status.HTTP_201_CREATED)
 def create_farm(farm_in: CreateFarmRequest, db: Session = Depends(get_db)):
     try:
@@ -98,13 +99,13 @@ def create_farm(farm_in: CreateFarmRequest, db: Session = Depends(get_db)):
             lots=farm_in.lots,
             productivity=farm_in.productivity,
             status=farm_in.status,
-            image_url=farm_in.imageUrl,
+            image_url=farm_in.imageUrl,  # ✅ Cambiar a minúsculas
             latitude=farm_in.latitude,
             longitude=farm_in.longitude,
             altitude=farm_in.altitude,
-            establishment_year=farm_in.establishmentYear,
-            main_variety=farm_in.mainVariety,
-            production_system=farm_in.productionSystem,
+            establishment_year=farm_in.establishmentYear,  # ✅ Cambiar a minúsculas
+            main_variety=farm_in.mainVariety,  # ✅ Cambiar a minúsculas
+            production_system=farm_in.productionSystem,  # ✅ Cambiar a minúsculas
             certifications=farm_in.certifications,
             producer_email=farm_in.producerEmail,
         )
@@ -122,6 +123,7 @@ def create_farm(farm_in: CreateFarmRequest, db: Session = Depends(get_db)):
             detail=f"Error al crear finca: {str(e)}"
         )
 
+    
 @app.get("/api/farms/producer/{producer_email}", response_model=List[FarmResponse])
 def get_farms_by_producer(producer_email: str, db: Session = Depends(get_db)):
     try:
