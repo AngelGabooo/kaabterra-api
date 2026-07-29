@@ -1,6 +1,5 @@
 # app/infrastructure/adapters/output/postgres_repository.py
 from sqlalchemy.orm import Session
-from sqlalchemy import text
 from typing import Optional
 import logging
 from app.domain.entities import User
@@ -16,14 +15,6 @@ class PostgresUserRepositoryAdapter(UserRepositoryPort):
     def find_by_email(self, email: str) -> Optional[User]:
         try:
             logger.info(f"Buscando usuario por email: {email}")
-            
-            # ✅ Corregir: usar text() para SQL explícito
-            try:
-                self.db.execute(text("SELECT 1"))
-            except Exception as e:
-                logger.error(f"❌ Error de conexión a la base de datos: {e}")
-                raise
-            
             sql_user = self.db.query(SQLUsuario).filter(SQLUsuario.email == email).first()
             if not sql_user:
                 logger.info(f"Usuario no encontrado: {email}")

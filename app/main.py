@@ -1,4 +1,4 @@
-# app/main.py - VERSIÓN DEFINITIVA SIN imageUrl
+# app/main.py - VERSIÓN COMPLETA CON LOGGING MEJORADO
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
@@ -6,6 +6,7 @@ from typing import List, Optional
 from pydantic import BaseModel
 import logging
 import os
+import traceback
 
 # Importar dependencias
 from app.infrastructure.config.database import get_db, engine
@@ -41,7 +42,7 @@ app.add_middleware(
 )
 
 # ============================================================
-# MODELOS PARA FARMS (SIN imageUrl)
+# MODELOS PARA FARMS
 # ============================================================
 
 class CreateFarmRequest(BaseModel):
@@ -51,7 +52,6 @@ class CreateFarmRequest(BaseModel):
     lots: int
     productivity: float
     status: str
-    # ❌ imageUrl ELIMINADO
     latitude: float
     longitude: float
     altitude: int
@@ -69,7 +69,6 @@ class FarmResponse(BaseModel):
     lots: int
     productivity: float
     status: str
-    # ❌ imageUrl ELIMINADO
     latitude: float
     longitude: float
     altitude: int
@@ -83,14 +82,31 @@ class FarmResponse(BaseModel):
         from_attributes = True
 
 # ============================================================
-# ENDPOINTS DE FARMS - DIRECTOS EN MAIN (SIN imageUrl)
+# ENDPOINTS DE FARMS - CON LOGGING MEJORADO
 # ============================================================
 
 @app.post("/api/farms", response_model=FarmResponse, status_code=status.HTTP_201_CREATED)
 def create_farm(farm_in: CreateFarmRequest, db: Session = Depends(get_db)):
     try:
-        logger.info(f"📤 Creando finca: {farm_in.name} para productor: {farm_in.producerEmail}")
+        logger.info("=" * 50)
+        logger.info("📤 CREANDO FINCA")
+        logger.info(f"📤 Nombre: {farm_in.name}")
+        logger.info(f"📤 Productor: {farm_in.producerEmail}")
+        logger.info(f"📤 Datos recibidos: {farm_in.model_dump()}")
+        logger.info("=" * 50)
         
+        # Verificar que el productor existe
+        from app.infrastructure.adapters.output.sql_models import SQLUsuario
+        producer = db.query(SQLUsuario).filter(SQLUsuario.email == farm_in.producerEmail).first()
+        if not producer:
+            logger.error(f"❌ Productor no encontrado: {farm_in.producerEmail}")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Productor no encontrado: {farm_in.producerEmail}"
+            )
+        logger.info(f"✅ Productor encontrado: {producer.fullname}")
+        
+        # Crear la finca
         farm = SQLFarm(
             name=farm_in.name,
             location=farm_in.location,
@@ -98,7 +114,6 @@ def create_farm(farm_in: CreateFarmRequest, db: Session = Depends(get_db)):
             lots=farm_in.lots,
             productivity=farm_in.productivity,
             status=farm_in.status,
-            # ❌ imageUrl ELIMINADO
             latitude=farm_in.latitude,
             longitude=farm_in.longitude,
             altitude=farm_in.altitude,
@@ -108,15 +123,25 @@ def create_farm(farm_in: CreateFarmRequest, db: Session = Depends(get_db)):
             certifications=farm_in.certifications,
             producer_email=farm_in.producerEmail,
         )
+        
+        logger.info("📤 Guardando finca en la base de datos...")
         db.add(farm)
         db.commit()
         db.refresh(farm)
         
         logger.info(f"✅ Finca creada con ID: {farm.id}")
+        logger.info("=" * 50)
+        
         return farm
+    except HTTPException:
+        raise
     except Exception as e:
         db.rollback()
+        logger.error("=" * 50)
         logger.error(f"❌ Error al crear finca: {e}")
+        logger.error(f"❌ Traceback completo:")
+        logger.error(traceback.format_exc())
+        logger.error("=" * 50)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error al crear finca: {str(e)}"
@@ -133,6 +158,7 @@ def get_farms_by_producer(producer_email: str, db: Session = Depends(get_db)):
         return farms
     except Exception as e:
         logger.error(f"❌ Error al obtener fincas: {e}")
+        logger.error(traceback.format_exc())
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error al obtener fincas: {str(e)}"
@@ -146,14 +172,12 @@ def update_farm(farm_id: int, farm_in: CreateFarmRequest, db: Session = Depends(
         if not farm:
             raise HTTPException(status_code=404, detail="Finca no encontrada")
         
-        # ✅ Actualizar campos (SIN imageUrl)
         farm.name = farm_in.name
         farm.location = farm_in.location
         farm.hectares = farm_in.hectares
         farm.lots = farm_in.lots
         farm.productivity = farm_in.productivity
         farm.status = farm_in.status
-        # ❌ imageUrl ELIMINADO
         farm.latitude = farm_in.latitude
         farm.longitude = farm_in.longitude
         farm.altitude = farm_in.altitude
@@ -173,6 +197,7 @@ def update_farm(farm_id: int, farm_in: CreateFarmRequest, db: Session = Depends(
     except Exception as e:
         db.rollback()
         logger.error(f"❌ Error al actualizar finca: {e}")
+        logger.error(traceback.format_exc())
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error al actualizar finca: {str(e)}"
@@ -195,6 +220,7 @@ def delete_farm(farm_id: int, db: Session = Depends(get_db)):
     except Exception as e:
         db.rollback()
         logger.error(f"❌ Error al eliminar finca: {e}")
+        logger.error(traceback.format_exc())
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error al eliminar finca: {str(e)}"

@@ -32,12 +32,11 @@ class SQLFarm(Base):
     latitude = Column(Float, nullable=False, default=0.0)
     longitude = Column(Float, nullable=False, default=0.0)
     altitude = Column(Integer, nullable=False, default=0)
-    # ✅ Usar los nombres EXACTOS que agregaste en la base de datos
     establishmentYear = Column("establishmentYear", Integer, nullable=True)
     mainVariety = Column("mainVariety", String(100), nullable=True)
     productionSystem = Column("productionSystem", String(100), nullable=True)
     certifications = Column("certifications", JSON, nullable=True)
-    producer_email = Column(String(150), ForeignKey("usuarios.email"), nullable=False)
-    fecha_creacion = Column(DateTime(timezone=True), server_default=func.now())
+    producer_email = Column("producer_email", String(150), ForeignKey("usuarios.email"), nullable=False)
+    fecha_creacion = Column("fecha_creacion", DateTime(timezone=True), server_default=func.now())
 
     producer = relationship("SQLUsuario", back_populates="farms")
